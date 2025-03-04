@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.room)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
@@ -25,6 +27,8 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            //Required when using NativeSQLiteDriver
+            linkerOpts.add("-lsqlite3")
         }
     }
     
@@ -46,12 +50,18 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
+            implementation(compose.materialIconsExtended)
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
         }
     }
+
 }
 
 android {
@@ -93,5 +103,23 @@ compose.desktop {
             packageName = "org.example.project.beforenow"
             packageVersion = "1.0.0"
         }
+    }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    // KSP support for Room Compiler.
+    //kspCommonMainMetadata(libs.room.compiler)
+    listOf(
+        "kspAndroid",
+        "kspDesktop",
+        "kspIosSimulatorArm64",
+        "kspIosX64",
+        "kspIosArm64"
+    ).forEach {
+        add(it, libs.room.compiler)
     }
 }
