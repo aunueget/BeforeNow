@@ -12,6 +12,9 @@ plugins {
 }
 
 kotlin {
+    sourceSets.iosMain {
+        kotlin.srcDir("build/generated/ksp/metadata")
+    }
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
@@ -111,6 +114,8 @@ room {
 }
 
 dependencies {
+    add("kspCommonMainMetadata", libs.room.compiler)
+    add("kspAndroid", libs.room.compiler)
     // KSP support for Room Compiler.
     //kspCommonMainMetadata(libs.room.compiler)
     listOf(
@@ -121,5 +126,11 @@ dependencies {
         "kspIosArm64"
     ).forEach {
         add(it, libs.room.compiler)
+    }
+
+    tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().configureEach {
+        if (name != "kspCommonMainKotlinMetadata") {
+            dependsOn("kspCommonMainKotlinMetadata")
+        }
     }
 }
